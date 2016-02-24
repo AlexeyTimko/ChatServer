@@ -1,0 +1,14 @@
+{
+  "name": "ChatAPI",
+  "version": "1.0.0",
+  "main": "server.js",
+  "description": "ChatAPI",
+  "repository": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto-js": "^3.1.6",
+    "express": "^4.13.4",
+    "mongoose": "^4.4.4",
+    "socket.io": "^1.4.5"
+  }
+}
