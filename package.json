@@ -8,6 +8,7 @@
   "dependencies": {
     "crypto-js": "^3.1.6",
     "express": "^4.13.4",
+    "lodash": "^4.5.1",
     "mongoose": "^4.4.4",
     "socket.io": "^1.4.5"
   }
