@@ -6,39 +6,46 @@ var User = require('../models/user'),
 exports.disconnect = function(store){
     var socket = this,
         users = store.state.users;
-    _.unset(users, socket.id);
-    store.setState(users);
+    if(users[socket.id] !== undefined){
+        socket.leave(store.location);
+        _.unset(users, socket.id);
+        store.setState(users);
+    }
 };
 
-exports.signUp = function (store, data) {
+exports.setLocation = function(store, data){
+    store.setState({location: data.location});
+};
+
+exports.signUp = function (store, data, respond) {
     var socket = this;
     User.findOne({name: data.name}, function (err, user) {
         if (err) {
-            socket.emit('sign up error', {message: 'SERVER_ERROR'});
+            respond({state: 'error', message: 'SERVER_ERROR'});
         }
 
         if (user) {
-            socket.emit('sign up error', {message: 'NAME_ALREADY_TAKEN'});
+            respond({state: 'error', message: 'NAME_ALREADY_TAKEN'});
         } else {
             user = new User();
             user.name = data.name;
             user.nickname = data.nickname;
             user.password = user.encryptPassword(data.password);
             user.token = user.generateToken();
-            user.location = data.location;
             user.save();
 
             var newUser = {};
             newUser[socket.id] = {user: user, socket: socket};
             store.setState({users: _.merge(store.state.users, newUser)});
+            socket.join(store.location);
 
-            socket.emit('sign up success', {token: user.token});
+            respond({state: 'success', token: user.token});
             common.updateChat(store, socket, true);
         }
     });
 };
 
-exports.signIn = function (store, data) {
+exports.signIn = function (store, data, respond) {
     var socket = this;
     var where, byToken = false;
     if (data.token !== undefined) {
@@ -50,13 +57,14 @@ exports.signIn = function (store, data) {
 
     User.findOne(where, function (err, user) {
         if (err) {
-            socket.emit('sign in error', {message: 'SERVER_ERROR'});
+            respond({state: 'error', message: 'SERVER_ERROR'});
         }
         var newUser = {};
         if (user && byToken) {
 
             newUser[socket.id] = {user: user, socket: socket};
             store.setState({users: _.merge(store.state.users, newUser)});
+            socket.join(store.location);
 
             common.updateChat(store, socket, true);
         } else if (user && user.checkPassword(data.password)) {
@@ -65,11 +73,12 @@ exports.signIn = function (store, data) {
 
             newUser[socket.id] = {user: user, socket: socket};
             store.setState({users: _.merge(store.state.users, newUser)});
+            socket.join(store.location);
 
-            socket.emit('sign in success', {token: user.token});
+            respond({state: 'success', token: user.token});
             common.updateChat(store, socket, true);
         } else {
-            socket.emit('sign in error', {message: 'INVALID_CREDENTIALS'});
+            respond({state: 'success', message: 'INVALID_CREDENTIALS'});
         }
     });
 };

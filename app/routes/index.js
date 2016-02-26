@@ -9,6 +9,7 @@ module.exports = function (store) {
         var route = routeMiddleware(socket, store);
         //auth events
         socket.on('disconnect', route(auth.disconnect));
+        socket.on('set location', route(auth.setLocation));
         socket.on('sign up', route(auth.signUp));
         socket.on('sign in', route(auth.signIn));
         //chat events

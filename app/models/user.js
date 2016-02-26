@@ -7,8 +7,7 @@ var UserSchema = new Schema({
     name: {type:String,required:true},
     nickname: {type:String},
     password: {type:String,required:true},
-    token: {type:String,required:true},
-    location: {type:String}
+    token: {type:String,required:true}
 });
 
 UserSchema.methods.encryptPassword = function(password){

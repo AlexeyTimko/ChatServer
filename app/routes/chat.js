@@ -9,7 +9,7 @@ exports.addMessage = function (store, data) {
     var message = new Message();
     message.user = user.nickname || user.name;
     message.text = data.message;
-    message.location = user.location;
+    message.location = store.location;
     message.date = new Date();
     message.save(function (err) {
         if (err) {
